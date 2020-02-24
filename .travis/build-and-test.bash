@@ -96,6 +96,7 @@ function osx_build_and_test() {
     ls -l /usr/local/opt/python
     ls -l /usr/local/opt/python/bin
     export PYTHON=/usr/local/opt/python/bin/python3
+    export PATH="/usr/local/opt/python/bin/:${PATH}"
     SUFFIX=$($PYTHON -c "import sys; print('{0}{1}'.format(sys.version_info[0], sys.version_info[1]))")
     echo using boost-python suffix ${SUFFIX}
     ./autogen.bash
