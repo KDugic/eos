@@ -29,7 +29,6 @@ namespace eos
         m_a1(p["mass::a_1(1260)^+"]),
         f_a1(p["decay-constant::a_1"]),
         eF_pi_rho(p["rho->pi::eV(0)"]),
-        eF_kk(p["'a_1->pi::eF_kk(0)"]),
         eF_g(p["a_1->pi::eF_g(0)"]),
         q_02(p["0->pigamma::q_0^2"])
 
@@ -49,9 +48,8 @@ namespace eos
         const double F_pi=1.0; // electromagnetic pion form factor is normalized to 1.0 for an on-shell photon    
         const double a_q0=1.0; // axial vector form factor at subtraction point  
 
-        return a_q0 - (q2-q_02)*f_a1/(m_pi*(m_a1*m_a1-q2)*(m_a1*m_a1-q_02))*
-                      (eF_kk/(1.602177e-19)*(m_a1*m_a1-m_pi*m_pi)*(m_a1*m_a1-m_pi*m_pi)/(12*m_a1*m_a1)
-                      -eF_g/(1.602177e-19)*m_a1*m_a1);
+        return a_q0 + (q2-q_02)*f_a1/(m_pi*(m_a1*m_a1-q2)*(m_a1*m_a1-q_02))*
+                      (eF_g/(1.602177e-19)*m_a1*m_a1);
     }
 
     complex<double>

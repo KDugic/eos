@@ -40,7 +40,6 @@ namespace eos
             Parameter m_a1;
             Parameter f_a1;
             Parameter eF_pi_rho;
-            Parameter eF_kk;
             Parameter eF_g;
             Parameter q_02;
 

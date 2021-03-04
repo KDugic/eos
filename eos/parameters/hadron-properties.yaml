@@ -633,10 +633,6 @@ groups:
           central: +0.171
           min:     +0.162
           max:     +0.180
-       'a_1->pi::eF_kk(0)' :
-          central: +0.0
-          min:     +0.0
-          max:     +0.0
        'a_1->pi::eF_g(0)' :
           central: +0.199
           min:     +0.161
