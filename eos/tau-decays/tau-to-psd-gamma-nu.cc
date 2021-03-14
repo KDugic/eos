@@ -44,13 +44,19 @@ namespace eos
 
         UsedParameter m_tau;
 
+        UsedParameter m_pi;
+
+        UsedParameter m_pi0;
+
+        UsedParameter f_pi;
+
         UsedParameter tau_tau;
 
         SwitchOption opt_P;
 
-        UsedParameter f_P;
+        /*UsedParameter f_P;
 
-        UsedParameter m_P;
+        UsedParameter m_P;*/
 
         std::shared_ptr<FormFactors<VacuumToPGamma>> ff;
 
@@ -61,24 +67,58 @@ namespace eos
             g_fermi(p["G_Fermi"], u),
             m_tau(p["mass::tau"], u),
             tau_tau(p["life_time::tau"], u),
-            opt_P(o, "P", {"pi", "K"}, "pi^-"),
-            f_P(p["decay-constant::" + opt_P.value() + "^-"], u),
-            m_P(p["mass::" + opt_P.value() + "^-"], u),
-            ff(FormFactorFactory<VacuumToPGamma>::create("0->" + opt_P.value() + "gamma", p, o))
+            opt_P(o, "P", {"pi", "K"}, "pi"),
+            /*f_P(p["decay-constant::" + opt_P.value() + "^-"], u),
+            m_P(p["mass::" + opt_P.value() + "^-"], u),*/
+            f_pi(p["decay-constant::pi"], u),
+            m_pi0(p["mass::pi^0"], u),
+            m_pi(p["mass::pi^+"], u),
+            ff(FormFactorFactory<VacuumToPGamma>::create("0->" + opt_P.value() + "gamma::DGKvD2020", p, o))
         {
             u.uses(*model);
             u.uses(*ff);
         }
 
-        double decay_width(const double & q2) const
+/*TODO -use V_us if P = K
+       -replace delta
+       -define C,D
+       -apply form factor correction
+       -alpha_e at tau scale!
+       -check jacobi determinant xy -> E_gamma E_pi
+*/
+        double differential_ratio(const double & E_gamma, const double & E_pi) const
         {
-            return 0.0;
+            const double q2 = 2.0 * E_gamma * m_tau + 2.0 * E_pi * m_tau - m_tau * m_tau;
+            const double delta = pow( m_pi / m_tau, 2);
+            const double x = 2.0 * E_gamma / m_tau;
+            const double y = 2.0 * E_pi / m_tau;
+            const double F_BB = -2.0 * delta * (2.0 - x - y) / pow(x + y - 1.0 - delta, 2) - 2.0 * (1.0 - x - delta) / pow(x, 2) + 2.0 * y * (2.0 - x -y) / (x * (x + y - 1.0 - delta)) 
+                                - (1.0 - delta - x) / x - y * (1.0 + delta -y) / (x * (x + y - 1.0 - delta)) + (1.0 - delta - x) / (x + y - 1.0 - delta);
+            const double F_VV = (x + y - 1.0 - delta) * (x * (1.0 - delta - x) + y * (1.0 + delta - y)) - 2.0 * delta * x * (1.0 + delta - y);
+            const double F_AA = (x + y - 1.0 - delta) * (x * (1.0 - delta - x) + y * (1.0 + delta - y)) - 2.0 * delta * x * (1.0 + delta - y);
+            const double F_VB = (x + y - 1.0 - delta) * (1.0 + delta - y) / x;
+            const double F_AB = y * (1.0 + delta - y) / x - (x + y - 1.0 - delta) * (1.0 - delta - x) / x + (1.0 - delta - x) - 2.0 * delta * (1.0 + delta - y) / (x + y - 1.0 - delta);
+            const double F_AV = (x + y - 1.0 - delta) * (x * (1.0 - delta - x) - y * (1.0 + delta - y));
+            const complex<double> v_q2 = ff->v(q2) / m_pi();
+            const complex<double> v_0 = ff->v(0) / m_pi();
+            const complex<double> a_q2 = ff->a(q2) * 2.0 * m_pi() / (q2 - m_pi * m_pi);
+            const double alpha_e = 1.0 / 137.0; 
+            const double decay_width_pi0 = 7.73e-9;
+            const double C = decay_width_pi0 * pow(m_tau, 4) / (4.0 * M_PI * M_PI * alpha_e * pow(m_pi0, 3) * pow(f_pi * (1.0 - delta), 2));
+            const double D = pow(decay_width_pi0 / (8.0 * M_PI * M_PI * M_PI * m_pi0), 0.5) * pow(m_tau, 2) / ( m_pi0 * f_pi * pow(1.0 - delta, 2));
+            
+            return alpha_e / ( 2.0 * M_PI * (1.0-delta)*(1.0-delta)) * F_BB 
+                   + C * std::norm(v_q2 / v_0) * F_VV 
+                   + C * std::norm(a_q2 / v_0) * F_AA 
+                   - D * 2.0 * std::real(v_q2 / v_0) * F_VB 
+                   + D * 2.0 * std::real(a_q2 / v_0) * F_AB 
+                   + C * 2.0 * std::real(a_q2 * v_q2 / (v_0 * v_0)) * F_AV;
         }
 
-        double branching_ratio(const double & q2) const
+  /*      double branching_ratio(const double & q2) const
         {
             return decay_width(q2) * tau_tau / hbar;
-        }
+        }*/
     };
 
     TauToPseudoscalarGammaNeutrino::TauToPseudoscalarGammaNeutrino(const Parameters & parameters, const Options & options) :
@@ -90,12 +130,17 @@ namespace eos
     {
     }
 
-    double
+   /* double
     TauToPseudoscalarGammaNeutrino::branching_ratio(const double & q2) const
     {
         return _imp->branching_ratio(q2);
     }
-
+*/
+    double
+    TauToPseudoscalarGammaNeutrino::differential_ratio(const double & E_gamma, const double & E_pi) const
+    {
+        return _imp->differential_ratio(E_gamma, E_pi);
+    }
     const std::set<ReferenceName>
     TauToPseudoscalarGammaNeutrino::references
     {

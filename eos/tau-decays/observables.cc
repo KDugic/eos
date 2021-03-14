@@ -32,9 +32,12 @@ namespace eos
             R"(Observables in $\tau^-\to P \gamma\bar\nu$ decays)",
             R"()",
             {
-                make_observable("tau->pigammanu::dBR/dq2", R"(d\mathcal{B}(\tau^- \to \pi^-\gamma\bar\nu)/dq^2)",
+               /* make_observable("tau->pigammanu::dBR/dq2", R"(d\mathcal{B}(\tau^- \to \pi^-\gamma\bar\nu)/dq^2)",
                         &TauToPseudoscalarGammaNeutrino::branching_ratio,
-                        std::make_tuple("q2")),
+                        std::make_tuple("q2")),*/
+              make_observable("tau->pigammanu::R(E_gamma,E_pi)", R"(R(\tau^- \to \pi^-\gamma\bar\nu)/dq^2)",
+                        &TauToPseudoscalarGammaNeutrino::differential_ratio,
+                        std::make_tuple("E_gamma","E_pi")),
             }
         );
 

@@ -15,14 +15,16 @@ namespace eos
     class TauToPseudoscalarGammaNeutrino :
         public ParameterUser,
         public PrivateImplementationPattern<TauToPseudoscalarGammaNeutrino>
+        
     {
         public:
             TauToPseudoscalarGammaNeutrino(const Parameters & parameters, const Options & options);
             ~TauToPseudoscalarGammaNeutrino();
 
             // Observables
-            double branching_ratio(const double & q2) const;
-
+            double differential_ratio(const double & E_gamma, const double & E_pi) const;
+          /*  double branching_ratio(const double & q2) const;*/
+              
             /*!
              * References used in the computation of our observables.
              */
